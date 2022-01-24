@@ -1,5 +1,5 @@
 {
-  "name": "starknet",
+  "name": "@jediswap/starknet",
   "version": "2.7.0",
   "description": "JavaScript library for StarkNet",
   "main": "dist/index.js",
