@@ -120,11 +120,25 @@ export class Contract {
 
   private parseResponseField(
     element: AbiEntry | FunctionAbi,
-    responseIterator: Iterator<string>
+    responseIterator: Iterator<string>,
+    currentAcc?: { [key: string]: any }
   ): Args {
     let entries: AbiEntry[] = [];
-    if (['felt', 'felt*'].includes(element.type)) {
+    if (element.type === 'felt') {
       return responseIterator.next().value;
+    }
+    if (element.type === 'felt*') {
+      const arr = [];
+      const lengthFieldInHex = currentAcc?.[`${element.name}_len`];
+      const lengthFieldInNumber = toBN(lengthFieldInHex).toNumber();
+
+      while (arr.length < lengthFieldInNumber) {
+        const itter = responseIterator.next();
+        // if (itter.done) break;
+        arr.push(itter.value);
+      }
+
+      return arr as any;
     }
     if (element.type in this.structs) {
       entries = this.structs[element.type].members;
@@ -134,7 +148,7 @@ export class Contract {
     return entries.reduce(
       (acc, member) => ({
         ...acc,
-        [member.name]: this.parseResponseField(member, responseIterator),
+        [member.name]: this.parseResponseField(member, responseIterator, acc),
       }),
       {}
     );
@@ -185,4 +199,23 @@ export class Contract {
       })
       .then((x) => this.parseResponse(method, x.result));
   }
+
+  // public async multicall(method: string, args: Args = {}) {
+  //   assert(this.connectedTo !== null, 'contract isnt connected to an address');
+
+  //   // validate method and args
+  //   this.validateMethodAndArgs('CALL', method, args);
+
+  //   // compile calldata
+  //   const entrypointSelector = getSelectorFromName(method);
+  //   const calldata = compileCalldata(args);
+
+  //   return this.provider
+  //     .callContract({
+  //       contract_address: this.connectedTo,
+  //       calldata,
+  //       entry_point_selector: entrypointSelector,
+  //     })
+  //     .then((res) => res);
+  // }
 }
