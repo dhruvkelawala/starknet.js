@@ -1,6 +1,6 @@
 {
   "name": "@jediswap/starknet",
-  "version": "2.7.3",
+  "version": "2.7.4",
   "description": "JavaScript library for StarkNet",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
